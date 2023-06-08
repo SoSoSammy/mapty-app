@@ -24,6 +24,7 @@ class Workout {
 
   click() {
     this.clicks++;
+    console.log(this);
   }
 }
 
@@ -110,7 +111,7 @@ class App {
   _loadMap(position) {
     const { latitude } = position.coords;
     const { longitude } = position.coords;
-    console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
+    // console.log(`https://www.google.com/maps/@${latitude},${longitude}`);
 
     const coords = [latitude, longitude];
 
@@ -309,7 +310,7 @@ class App {
     });
 
     // Using the public interface
-    // workout.click();
+    workout.click();
   }
 
   _setLocalStorage() {
@@ -317,9 +318,13 @@ class App {
   }
 
   _getLocalStorage() {
-    const data = JSON.parse(localStorage.getItem("workouts"));
+    // Get the workout objects from local storage
+    let data = JSON.parse(localStorage.getItem("workouts"));
 
     if (!data) return;
+
+    // Create objects of Running and Cycling prototypes from workouts local storage
+    data = this._preservePrototypeChain(data);
 
     // Set workouts of App to data from local storage
     this.#workouts = data;
@@ -327,6 +332,43 @@ class App {
     // Display the workouts list from local storage
     this.#workouts.forEach(work => {
       this._renderWorkout(work);
+    });
+  }
+
+  _preservePrototypeChain(data) {
+    // Loop through data array and create objects from the Running and Cycling prototype
+    return data.map(entry => {
+      // Create Running instance
+      if (entry.type === "running") {
+        // Create object from Running class using entry data
+        const workout = new Running(
+          entry.coords,
+          entry.distance,
+          entry.duration,
+          entry.cadence
+        );
+        // Redefine properties on object using entry data
+        workout.id = entry.id;
+        workout.date = entry.date;
+        workout.clicks = entry.clicks;
+        return workout;
+      }
+
+      // Create Cycling instance
+      if (entry.type === "cycling") {
+        // Create object from Cycling class using entry data
+        const workout = new Cycling(
+          entry.coords,
+          entry.distance,
+          entry.duration,
+          entry.elevationGain
+        );
+        // Redefine properties on object using entry data
+        workout.id = entry.id;
+        workout.date = entry.date;
+        workout.clicks = entry.clicks;
+        return workout;
+      }
     });
   }
 
