@@ -23,16 +23,34 @@ if (navigator.geolocation)
 
       // Create map on div with id of map, set location to coords and zoom level to 13
       const map = L.map("map").setView(coords, 13);
+      // console.log(map);
 
       L.tileLayer("https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(map);
 
-      L.marker(coords)
-        .addTo(map)
-        .bindPopup("A pretty CSS popup.<br> Easily customizable.")
-        .openPopup();
+      // When the user clicks on the map
+      map.on("click", function (mapEvent) {
+        console.log(mapEvent);
+        // Get the latitude and longitude of the area where the user clicked
+        const { lat, lng } = mapEvent.latlng;
+
+        // Place the marker where the user clicked
+        L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(
+            L.popup({
+              maxWidth: 250,
+              minWidth: 100,
+              autoClose: false,
+              closeOnClick: false,
+              className: "running-popup",
+            })
+          )
+          .setPopupContent("Workout")
+          .openPopup();
+      });
     },
     function () {
       alert("Could not get your position");
